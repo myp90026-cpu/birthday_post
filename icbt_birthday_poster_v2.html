@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ICBT Birthday Poster Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@300;400;600;700;800&family=Noto+Sans+Sinhala:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Poppins', 'Noto Sans Sinhala', sans-serif;
+            background-color: #0d1117;
+        }
+
+        /* =============================================
+           POSTER: 500 x 700px — all children absolute
+           ============================================= */
+        #posterContainer {
+            position: relative;
+            width: 500px;
+            height: 700px;
+            flex-shrink: 0;
+            overflow: hidden;
+            border-radius: 18px;
+            border: 6px solid #ef4444;
+            background-color: #020617;
+            background-image: radial-gradient(circle at 50% 30%, #1e3a8a 0%, #020617 70%);
+            box-shadow: 0 0 40px rgba(239,68,68,0.3);
+        }
+
+        /* subtle overlay */
+        #posterContainer::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(239,68,68,0.06) 0%, transparent 50%, rgba(30,58,138,0.12) 100%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* All direct poster children sit above overlay */
+        #posterContainer > * { position: absolute; z-index: 0; }
+
+        /* ── Corner brackets ── */
+        .corner { position: absolute; width: 44px; height: 44px; z-index: 2; }
+        .corner-tl { top: 12px; left: 12px; border-top: 2px solid rgba(255,255,255,0.35); border-left: 2px solid rgba(255,255,255,0.35); }
+        .corner-tr { top: 12px; right: 12px; border-top: 2px solid rgba(255,255,255,0.35); border-right: 2px solid rgba(255,255,255,0.35); }
+        .corner-bl { bottom: 12px; left: 12px; border-bottom: 2px solid rgba(255,255,255,0.35); border-left: 2px solid rgba(255,255,255,0.35); }
+        .corner-br { bottom: 12px; right: 12px; border-bottom: 2px solid rgba(255,255,255,0.35); border-right: 2px solid rgba(255,255,255,0.35); }
+
+        /* ── Stars ── */
+        .star { position: absolute; font-size: 11px; z-index: 2; }
+
+        /* ── HEADER BADGE (y=18) ── */
+        #headerBadge {
+            top: 18px; left: 50%; transform: translateX(-50%);
+            display: flex; align-items: center; gap: 8px;
+            padding: 6px 18px;
+            background: rgba(255,255,255,0.10);
+            border: 1px solid rgba(255,255,255,0.20);
+            border-radius: 999px;
+            white-space: nowrap;
+        }
+        #headerBadge .logo-circle {
+            width: 28px; height: 28px; border-radius: 50%;
+            background: linear-gradient(135deg, #1d4ed8, #dc2626);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 8px; font-weight: 800; color: #fff;
+            overflow: hidden; flex-shrink: 0;
+        }
+        #headerBadge .logo-circle img { width: 100%; height: 100%; object-fit: cover; }
+        #headerBadge span {
+            font-size: 11px; font-weight: 700; letter-spacing: 0.18em;
+            color: #fff; text-transform: uppercase;
+        }
+
+        /* ── CAKE (y=78) ── */
+        #cakeWrap {
+            top: 78px; left: 50%; transform: translateX(-50%);
+            width: 72px; height: 72px;
+        }
+
+        /* ── HAPPY text (y=156) ── */
+        #happyText {
+            top: 156px; left: 50%; transform: translateX(-50%);
+            font-size: 11px; letter-spacing: 0.32em; color: rgba(255,255,255,0.88);
+            font-weight: 300; text-transform: uppercase; white-space: nowrap;
+        }
+
+        /* ── Birthday cursive (y=172) ── */
+        #birthdayText {
+            top: 185px; left: 50%; transform: translateX(-50%);
+            font-family: 'Great Vibes', cursive;
+            font-size: 56px; color: #fff;
+            text-shadow: 0 2px 12px rgba(0,0,0,0.5);
+            white-space: nowrap; line-height: 1;
+        }
+
+        /* ── Balloon LEFT (y=270) ── */
+        #balloonLeft {
+            top: 270px; left: 28px;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        #balloonLeft .body {
+            width: 42px; height: 52px;
+            background: #dc2626; border-radius: 50%;
+            position: relative; box-shadow: 2px 2px 8px rgba(0,0,0,0.4);
+        }
+        #balloonLeft .body::after {
+            content:''; position:absolute; top:8px; left:8px;
+            width:12px; height:16px; background:rgba(255,255,255,0.28); border-radius:50%;
+        }
+        #balloonLeft .string {
+            width: 1px; height: 60px;
+            background: rgba(255,255,255,0.25);
+        }
+
+        /* ── Balloon RIGHT (y=285) ── */
+        #balloonRight {
+            top: 285px; right: 28px;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        #balloonRight .body {
+            width: 42px; height: 52px;
+            background: #2563eb; border-radius: 50%;
+            position: relative; box-shadow: 2px 2px 8px rgba(0,0,0,0.4);
+        }
+        #balloonRight .body::after {
+            content:''; position:absolute; top:8px; left:8px;
+            width:12px; height:16px; background:rgba(255,255,255,0.28); border-radius:50%;
+        }
+        #balloonRight .string {
+            width: 1px; height: 60px;
+            background: rgba(255,255,255,0.25);
+        }
+
+        /* ── PROFILE IMAGE (y=252) ── */
+        #profileWrap {
+            top: 252px; left: 50%; transform: translateX(-50%);
+            width: 158px; height: 158px;
+        }
+        #profileGlow {
+            position: absolute; inset: -6px; border-radius: 50%;
+            background: linear-gradient(135deg, #2563eb, #fff, #dc2626);
+            filter: blur(6px); opacity: 0.7;
+        }
+        #profileFrame {
+            position: absolute; inset: 0;
+            border-radius: 50%; overflow: hidden;
+            border: 4px solid #fff;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+            background: #1e293b;
+        }
+        #profileImage { width: 100%; height: 100%; object-fit: cover; }
+
+        /* ── NAME (y=430) ── */
+        #displayName {
+            top: 430px; left: 50%; transform: translateX(-50%);
+            font-size: 20px; font-weight: 800; letter-spacing: 0.12em;
+            color: #fff; text-transform: uppercase;
+            text-shadow: 0 1px 6px rgba(0,0,0,0.5);
+            white-space: nowrap;
+            text-align: center;
+        }
+
+        /* ── NICKNAME (y=460) ── */
+        #displayNickname {
+            top: 460px; left: 50%; transform: translateX(-50%);
+            font-size: 10px; font-weight: 700; letter-spacing: 0.22em;
+            color: #ef4444; text-transform: uppercase; white-space: nowrap;
+        }
+
+        /* ── DIVIDER + DATE (y=480) ── */
+        #dateLine {
+            top: 480px; left: 50%; transform: translateX(-50%);
+            display: flex; align-items: center; gap: 10px; white-space: nowrap;
+        }
+        #dateLine .bar { width: 22px; height: 1px; background: rgba(255,255,255,0.28); }
+        #displayDate {
+            font-size: 10px; font-weight: 700; letter-spacing: 0.22em;
+            color: #93c5fd; text-transform: uppercase;
+        }
+
+        /* ── FOOTER BADGE (y=680) ── */
+        #footerBadge {
+            bottom: 72px; left: 50%; transform: translateX(-50%);
+            display: flex; align-items: center; gap: 7px;
+            padding: 5px 14px;
+            background: rgba(0,0,0,0.45);
+            border: 1px solid rgba(100,116,139,0.45);
+            border-radius: 999px; white-space: nowrap;
+        }
+        #footerBadge .dot {
+            width: 16px; height: 16px; border-radius: 50%;
+            background: #dc2626; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 7px; font-weight: 800; color: #fff;
+        }
+        #footerBadge span { font-size: 8px; font-weight: 600; color: #cbd5e1; letter-spacing: 0.1em; }
+
+        /* ── WISH TEXT (y=724) ── */
+        #displayWish {
+            bottom: 20px; left: 50%; transform: translateX(-50%);
+            font-size: 10px; color: rgba(255,255,255,0.75);
+            letter-spacing: 0.04em; text-align: center;
+            width: 300px; line-height: 1.5;
+        }
+    </style>
+</head>
+<body class="text-white min-h-screen flex flex-col items-center justify-center p-4 md:p-8">
+
+    <!-- Notification -->
+    <div id="customAlert" class="fixed top-5 right-5 z-50 transform translate-x-full transition-transform duration-300 bg-slate-900 border-l-4 border-red-500 text-white px-6 py-4 rounded-lg shadow-2xl max-w-sm hidden">
+        <div class="flex items-start gap-3">
+            <i class="fa-solid fa-circle-exclamation text-red-500 text-xl mt-0.5"></i>
+            <div>
+                <h4 class="font-bold text-sm">දැනුම්දීමක්!</h4>
+                <p id="alertMessage" class="text-xs text-slate-300 mt-1"></p>
+            </div>
+            <button onclick="closeAlert()" class="text-slate-400 hover:text-white ml-auto"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+    </div>
+
+    <div class="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+        <!-- LEFT: FORM -->
+        <div class="lg:col-span-5 bg-slate-900/80 backdrop-blur-md p-6 rounded-2xl border border-slate-800 shadow-xl space-y-6">
+            <div>
+                <h1 class="text-2xl font-bold text-red-500 flex items-center gap-2">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> ICBT පෝස්ටර් සාදන්නා
+                </h1>
+                <p class="text-slate-400 text-sm mt-1">ඔබට අවශ්‍ය විස්තර සහ පින්තූරය ඇතුළත් කර පෝස්ටරය සකසා ගන්න.</p>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1">නම (Name)</label>
+                    <input type="text" id="inputName" value="TESLIER DEWMINI" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-red-500 focus:outline-none transition">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-1">සුරතල් නම (Nickname)</label>
+                        <input type="text" id="inputNickname" value="Second Year" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-red-500 focus:outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-1">උපන්දිනය (Date)</label>
+                        <input type="text" id="inputDate" value="June 12th" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-red-500 focus:outline-none transition">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1">කැම්පස් ලෝගෝව (Campus Logo)</label>
+                    <input type="file" id="logo-file" accept="image/*" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-xs text-white focus:ring-2 focus:ring-red-500 focus:outline-none transition">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1">උපන්දින හිමිකරුගේ පින්තූරය (Photo)</label>
+                    <label for="dropzone-file" class="flex flex-col items-center justify-center w-full h-24 border-2 border-slate-700 border-dashed rounded-lg cursor-pointer bg-slate-800 hover:bg-slate-700/50 transition">
+                        <i class="fa-solid fa-cloud-arrow-up text-xl text-slate-400 mb-1"></i>
+                        <p class="text-xs text-slate-400"><span class="font-semibold">Click to upload</span></p>
+                        <p class="text-[10px] text-slate-500">PNG or JPG</p>
+                        <input id="dropzone-file" type="file" accept="image/*" class="hidden">
+                    </label>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1">පාදක වැකිය (Footer Wish)</label>
+                    <textarea id="inputWish" rows="2" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white text-sm focus:ring-2 focus:ring-red-500 focus:outline-none transition">Happy birthday to an absolute star!</textarea>
+                </div>
+                <button id="downloadBtn" class="w-full bg-gradient-to-r from-red-600 to-blue-700 hover:from-red-500 hover:to-blue-600 text-white font-semibold py-3 px-4 rounded-lg shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-download"></i> පෝස්ටරය භාගත කරන්න (Download Poster)
+                </button>
+            </div>
+        </div>
+
+        <!-- RIGHT: POSTER (scroll wrapper for small screens) -->
+        <div class="lg:col-span-7 flex justify-center items-start overflow-x-auto">
+            <div id="posterContainer">
+
+                <!-- Corner brackets -->
+                <div class="corner corner-tl"></div>
+                <div class="corner corner-tr"></div>
+                <div class="corner corner-bl"></div>
+                <div class="corner corner-br"></div>
+
+                <!-- Stars (using SVG stars — no FontAwesome dependency in export) -->
+                <svg class="star" style="top:10%;left:9%;color:#facc15;opacity:0.85;" width="13" height="13" viewBox="0 0 24 24" fill="#facc15"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 14.14 2 9.27l6.91-1.01z"/></svg>
+                <svg class="star" style="top:17%;right:11%;color:#fde047;opacity:0.95;" width="15" height="15" viewBox="0 0 24 24" fill="#fde047"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 14.14 2 9.27l6.91-1.01z"/></svg>
+                <svg class="star" style="top:49%;left:7%;opacity:0.55;" width="11" height="11" viewBox="0 0 24 24" fill="white"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 14.14 2 9.27l6.91-1.01z"/></svg>
+                <svg class="star" style="top:53%;right:9%;opacity:0.75;" width="12" height="12" viewBox="0 0 24 24" fill="#facc15"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 14.14 2 9.27l6.91-1.01z"/></svg>
+                <svg class="star" style="bottom:28%;left:14%;opacity:0.90;" width="14" height="14" viewBox="0 0 24 24" fill="#fde047"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 14.14 2 9.27l6.91-1.01z"/></svg>
+                <svg class="star" style="bottom:22%;right:13%;opacity:0.45;" width="11" height="11" viewBox="0 0 24 24" fill="white"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 14.14 2 9.27l6.91-1.01z"/></svg>
+
+                <!-- HEADER BADGE -->
+                <div id="headerBadge">
+                    <div class="logo-circle" id="logoCircle">
+                        <span id="defaultLogoText" style="font-size:8px;font-weight:800;">ICBT</span>
+                        <img id="displayLogoImg" src="" alt="" style="display:none;width:100%;height:100%;object-fit:cover;">
+                    </div>
+                    <span>ICBT Campus Computer Society</span>
+                </div>
+
+                <!-- CAKE SVG -->
+                <div id="cakeWrap">
+                    <svg viewBox="0 0 64 64" style="width:100%;height:100%;">
+                        <circle cx="24" cy="13" r="2" fill="#facc15"/>
+                        <circle cx="32" cy="9" r="2" fill="#facc15"/>
+                        <circle cx="40" cy="13" r="2" fill="#facc15"/>
+                        <rect x="23" y="15" width="2" height="7" fill="#ef4444"/>
+                        <rect x="31" y="11" width="2" height="9" fill="#ef4444"/>
+                        <rect x="39" y="15" width="2" height="7" fill="#ef4444"/>
+                        <rect x="20" y="22" width="24" height="6" rx="2" fill="#facc15"/>
+                        <rect x="18" y="28" width="28" height="10" rx="2" fill="#3b82f6"/>
+                        <rect x="14" y="38" width="36" height="14" rx="3" fill="#fff" opacity="0.95"/>
+                        <circle cx="24" cy="45" r="2" fill="#ef4444"/>
+                        <circle cx="32" cy="45" r="2" fill="#3b82f6"/>
+                        <circle cx="40" cy="45" r="2" fill="#ef4444"/>
+                        <circle cx="28" cy="33" r="1.5" fill="#fff"/>
+                        <circle cx="36" cy="33" r="1.5" fill="#fff"/>
+                    </svg>
+                </div>
+
+                <!-- HAPPY text -->
+                <div id="happyText">H A P P Y</div>
+
+                <!-- Birthday -->
+                <div id="birthdayText">Birthday</div>
+
+                <!-- Balloon LEFT -->
+                <div id="balloonLeft">
+                    <div class="body"></div>
+                    <div class="string"></div>
+                </div>
+
+                <!-- Balloon RIGHT -->
+                <div id="balloonRight">
+                    <div class="body"></div>
+                    <div class="string"></div>
+                </div>
+
+                <!-- PROFILE IMAGE -->
+                <div id="profileWrap">
+                    <div id="profileGlow"></div>
+                    <div id="profileFrame">
+                        <img id="profileImage" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400" alt="Birthday Person">
+                    </div>
+                </div>
+
+                <!-- NAME -->
+                <div id="displayName">TESLIER DEWMINI</div>
+
+                <!-- NICKNAME -->
+                <div id="displayNickname">SECOND YEAR</div>
+
+                <!-- DATE LINE -->
+                <div id="dateLine">
+                    <div class="bar"></div>
+                    <div id="displayDate">JUNE 12TH</div>
+                    <div class="bar"></div>
+                </div>
+
+                <!-- FOOTER BADGE -->
+                <div id="footerBadge">
+                    <div class="dot">I</div>
+                    <span>ICBT Students' Association</span>
+                </div>
+
+                <!-- WISH -->
+                <div id="displayWish">Happy birthday to an absolute star!</div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const inputName     = document.getElementById('inputName');
+        const inputNickname = document.getElementById('inputNickname');
+        const inputDate     = document.getElementById('inputDate');
+        const inputWish     = document.getElementById('inputWish');
+        const fileInput     = document.getElementById('dropzone-file');
+        const logoFileInput = document.getElementById('logo-file');
+
+        const displayName     = document.getElementById('displayName');
+        const displayNickname = document.getElementById('displayNickname');
+        const displayDate     = document.getElementById('displayDate');
+        const displayWish     = document.getElementById('displayWish');
+        const profileImage    = document.getElementById('profileImage');
+        const defaultLogoText = document.getElementById('defaultLogoText');
+        const displayLogoImg  = document.getElementById('displayLogoImg');
+        const downloadBtn     = document.getElementById('downloadBtn');
+        const posterContainer = document.getElementById('posterContainer');
+        const customAlert     = document.getElementById('customAlert');
+        const alertMessage    = document.getElementById('alertMessage');
+
+        function showAlert(msg) {
+            alertMessage.innerText = msg;
+            customAlert.classList.remove('hidden','translate-x-full');
+            setTimeout(closeAlert, 6000);
+        }
+        function closeAlert() {
+            customAlert.classList.add('translate-x-full');
+            setTimeout(() => customAlert.classList.add('hidden'), 300);
+        }
+
+        inputName.addEventListener('input', e => {
+            displayName.innerText = (e.target.value || 'NAME').toUpperCase();
+        });
+        inputNickname.addEventListener('input', e => {
+            displayNickname.innerText = (e.target.value || 'NICKNAME').toUpperCase();
+        });
+        inputDate.addEventListener('input', e => {
+            displayDate.innerText = (e.target.value || 'DATE').toUpperCase();
+        });
+        inputWish.addEventListener('input', e => {
+            displayWish.innerText = e.target.value || 'HAPPY BIRTHDAY!';
+        });
+
+        fileInput.addEventListener('change', function () {
+            const file = this.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => profileImage.src = e.target.result;
+            reader.readAsDataURL(file);
+        });
+
+        logoFileInput.addEventListener('change', function () {
+            const file = this.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                displayLogoImg.src = e.target.result;
+                displayLogoImg.style.display = 'block';
+                defaultLogoText.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        });
+
+        downloadBtn.addEventListener('click', () => {
+            downloadBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> සකසමින්...';
+            downloadBtn.disabled = true;
+
+            // Scroll to top so html2canvas captures correctly
+            window.scrollTo(0, 0);
+
+            setTimeout(() => {
+                const rect = posterContainer.getBoundingClientRect();
+                html2canvas(posterContainer, {
+                    useCORS: true,
+                    allowTaint: false,
+                    scale: 3,
+                    backgroundColor: null,
+                    logging: false,
+                    x: 0, y: 0,
+                    scrollX: window.scrollX,
+                    scrollY: window.scrollY,
+                    width: posterContainer.offsetWidth,
+                    height: posterContainer.offsetHeight,
+                    windowWidth: posterContainer.offsetWidth,
+                    windowHeight: posterContainer.offsetHeight
+                }).then(canvas => {
+                    const link = document.createElement('a');
+                    link.download = `${displayName.innerText.replace(/\s+/g,'_')}_Birthday_Poster.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                    downloadBtn.innerHTML = '<i class="fa-solid fa-download"></i> පෝස්ටරය භාගත කරන්න (Download Poster)';
+                    downloadBtn.disabled = false;
+                }).catch(err => {
+                    console.error(err);
+                    showAlert('පෝස්ටරය භාගත කිරීමේදී දෝෂයක් ඇති විය.');
+                    downloadBtn.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> නැවත උත්සාහ කරන්න';
+                    downloadBtn.disabled = false;
+                });
+            }, 600);
+        });
+    </script>
+</body>
+</html>

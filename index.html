@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ICBT Birthday Poster Maker</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #0b0f19;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 120vh;
+            padding: 20px;
+        }
+        
+        .glowing-effect{
+            filter: drop-shadow(0px 0px 5px rgba(255, 255, 255, 0.5));
+        }
+
+        .person-photo-frame{
+            filter: drop-shadow(0px 0px 10px rgba(59, 130, 246, 0.8));
+            width: 100%;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 40px;
+            max-width: 1150px;
+            width: 100%;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        /* Form UI */
+        .form-section {
+            background-color: #111827;
+            padding: 30px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 450px;
+            border: 1px solid #1f2937;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        .form-section h2 {
+            font-size: 22px;
+            margin-bottom: 20px;
+            color: #ef4444;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+            color: #9ca3af;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            background-color: #1f2937;
+            border: 1px solid #374151;
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 14px;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            border-color: #3b82f6;
+            outline: none;
+        }
+
+        .row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .download-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #0b85ef, #06e3b7);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2);
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+        }
+
+        /* Poster Preview UI */
+        .preview-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .poster {
+            width: 450px;
+            height: 610px;
+            background: radial-gradient(circle at center, #02184c 0%,#051237 50%, #040f24 100%);
+            outline: 4px solid #02133b;
+            outline-offset: -4px;
+            border-radius: 1px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            text-align: center;
+            position: relative;
+            box-shadow: 0px 20px 40px rgba(0,0,0,0.6);
+            overflow: hidden;
+        }
+
+        .poster::before {
+            content: '';
+            position: absolute;
+            top: 10px; left: 10px; right: 10px; bottom: 10px;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 12px;
+            pointer-events: none;
+        }
+
+        .top-campus-header {
+            display:flex;
+            align-items: center;
+            gap: 16px;
+            background: rgba(255, 255, 255, 0.06);
+            padding: 6px 14px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            color: #e2e8f0;
+        }
+
+        .top-campus-header img {
+            width: 18px;
+            height: 18px;
+            object-fit: contain;
+        }
+
+        .cake-container {
+            margin-top: 5px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .background-content {
+            padding: 20px;
+            background-color: #f0f0f0;
+            height: 100%;
+        }
+
+        /* Cake Image එක පිටුපසින් තැබීමට z-index: 1; ලබා දී ඇත */
+        .front-image {
+            position: absolute;
+            top: -70px ;
+            left: -20px;
+            width: 200px;
+            rotate: -10deg;
+            height: auto;
+            z-index: 1; 
+        }
+
+        /* Text එක Cake එකට උඩින් (In front) පෙන්වීමට position සහ z-index වෙනස් කර ඇත */
+        .happy-birthday {
+            font-family: 'Great Vibes', cursive;
+            font-size: 50px;
+            color: #ffffff; /* පොඩ්ඩක් අඳුරු කරපු සුදු පැහැය */
+            margin-top: 25px;
+            display:flex;
+            top: -25px;
+            margin-bottom: -60px; /* කේක් එක උඩට text එක overlap කරවීමට minus margin එකක් දමා ඇත */
+            text-shadow: 0 0 8px rgba(0, 0, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.7);
+            position: relative;
+            z-index: 5;
+            text-shadow:
+                0 0 10px #ffffff,
+                0 0 40px rgba(255,255,255,0.2);
+                  
+            
+        }
+
+        .main-logo-frame {
+            width: 210px;
+            height: 210px;
+            background-color: #ffffff;
+            border-radius: 50%;
+            display: flex;
+            top: -70px;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            border: 4px solid #3b82f6;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.6), inset 0 0 10px rgba(0,0,0,0.1);
+            margin: 10px 0;
+            position: relative;
+            z-index: 2;
+            box-shadow:
+                0 0 10px #3b82f6,
+                0 0 15px #3b82f6,
+                0 0 35px rgba(59,130,246,0.2);
+        }
+
+        .main-logo-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+
+        .text-details-wrapper {
+            margin-top: -100px;
+            position: relative;
+            z-index: 6;
+        }
+
+        .user-name {
+            font-size: 26px;
+            font-weight: 700;
+            
+            text-transform: uppercase;
+            color: #ffffff;
+            letter-spacing: 1.5px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            
+        }
+
+        .user-details {
+            font-size: 12px;
+            color: #ef4444;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-top: 1px;
+        }
+
+        .user-date {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 6px;
+            display: inline-block;
+            border-top: 1px solid rgba(255,255,255,0.15);
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+            padding: 3px 20px;
+            letter-spacing: 1px;
+        }
+
+        .footer-wish {
+            font-size: 13px;
+            color: #99a2a2;
+            line-height: 1.5;
+            max-width: 85%;
+            margin-bottom: 5px;
+            font-style: italic;
+            z-index: 6;
+        }
+
+        /* Bottom Logo Style */
+        .bottom-logo {
+            width: 200px;
+            height: auto;
+            object-fit: contain;
+            margin-bottom: 15px;
+            z-index: 6;
+            position: relative;
+        }
+
+        .balloon {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+        }
+        .balloon::after {
+            content: "";
+            position: absolute;
+            bottom: -6px; left: 12px;
+            border-left: 2px solid transparent;
+            border-right: 2px solid transparent;
+            border-top: 6px solid rgba(255,255,255,0.3);
+        }
+        .b-red1 { left: 25px; top: 120px; background: #ffffff00; transform: rotate(-15deg); }
+        .b-blue1 { left: 45px; top: 140px; background: #ffffff00; transform: rotate(-5deg); opacity: 0.8; }
+        .b-red3 { right: 60px; top: 140px; background: #ffffff00; transform: rotate(5deg); opacity: 0.8; }
+        .b-blue2 { right: 25px; top: 120px; background: #ffffff00; transform: rotate(15deg); }
+        .b-red2 { right: 45px; top: 140px; background: #ffffff00; transform: rotate(5deg); opacity: 0.8; }
+        .b-blue3 { right: 25px; top: 120px; background: #ffffff00; transform: rotate(15deg); }
+        
+        .star {
+            position: absolute;
+            color: #f59e0b;
+            font-size: 20px;
+        }
+        .s1 { top: 75px; left: 50px;font-size: 20px; color: #fbbf24; }
+        .s2 { top: 90px; right: 60px; font-size: 15px; color: #7afb24; }
+        .s3 { bottom: 150px; left: 40px; font-size: 17px;color: #d80fe2; }
+        .s4 { bottom: 160px; right: 60px; font-size: 12px; color: #f59e0b; }
+        .s5 { top: 280px; left: 90px; font-size: 25px; color: #f59e0b; }
+        .s6 { top: 250px; right: 80px; font-size: 19px; color: #e15e0b; }
+
+        @keyframes flicker {
+            0% { opacity: 0.8; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <div class="form-section">
+        <h2> Birthday Poster Maker</h2>
+        
+        <div class="form-group">
+            <label>Name</label>
+            <input type="text" id="inputName" value="" oninput="updatePoster()">
+        </div>
+
+        <div class="row">
+            <div class="form-group" style="flex: 1;">
+                <label>Nickname</label>
+                <input type="text" id="inputNick" value="" oninput="updatePoster()">
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label>Date</label>
+                <input type="text" id="inputDate" value="" oninput="updatePoster()">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Select photo</label>
+            <input type="file" id="inputLogo" accept="image/*" onchange="loadLogo(event)">
+        </div>
+
+        <div class="form-group">
+            <label>Footer Wish</label>
+            <textarea id="inputWish" rows="3" oninput="updatePoster()">Happy birthday to an absolute star! Wishing you a fantastic year ahead filled with success and joy.</textarea>
+        </div>
+
+        <button class="download-btn" onclick="downloadPoster()">Download Poster</button>
+    </div>
+
+    <div class="preview-section">
+        <div class="poster" id="posterContainer">
+            
+            <div class="balloon b-red1"></div>
+            <div class="balloon b-blue1"></div>
+            <div class="balloon b-blue2"></div>
+            <div class="balloon b-red2"></div>
+            <div class="balloon b-blue3"></div>
+            <div class="balloon b-red3"></div>
+
+            <div class="star s1">★</div>
+            <div class="star s2">★</div>
+            <div class="star s3">★</div>
+            <div class="star s4">★</div>
+            <div class="star s5">★</div>
+            <div class="star s6">★</div>
+
+            <div class="top-campus-header">
+                <img id="topLogo" src="icbt-campus-logo.png" alt="ICBT">
+                <span>FACULTY OF INFORMATION TECHNOLOGY</span>
+            </div>
+
+            <div class="happy-birthday glowing-effect" id="glowingText">Happy Birthday</div>
+
+            <div class="cake-container">
+                <img id="cakeLogo" src="cake9.png" alt="Foreground Image" class="front-image" style="width: 100px; height: 100px; margin-left: 10px;">
+            </div>
+            
+            <div class="cake-container">
+                <img id="cakeLogo" src="balloon2.png" alt="Foreground Image" class="front-image" style="width: 100px; height: 200px; margin-left: 320px; margin-top: -5px; rotate: 0deg;">
+            </div>
+
+            <div class="cake-container">
+                <img id="cakeLogo" src="balloon2.png" alt="Foreground Image" class="front-image" style="width: 90px; height: 200px; margin-left: 20px; margin-top: 260px; rotate: 0deg;">
+            </div>
+
+            <div class="main-logo-frame">
+                <img id="posterLogo" src="profile.png" alt="Logo">
+            </div>
+
+            <div class="text-details-wrapper">
+                <div class="user-name" id="posterName">BIRTHDAY PERSON NAME</div>
+                <div class="user-details" id="posterNick">NICKNAME</div>
+                <div><span class="user-date" id="posterDate">DATE</span></div>
+            </div>
+
+            <div class="footer-wish" id="posterWish">
+                Happy birthday to an absolute star! Wishing you a fantastic year ahead filled with success and joy.
+            </div>
+
+            <!-- මෙතැනට නව ලෝගෝ එක එක් කර ඇත -->
+            <img class="bottom-logo" src="icbt campus logo.png" alt="ICBT Campus Logo">
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function updatePoster() {
+        document.getElementById('posterName').innerText = document.getElementById('inputName').value.toUpperCase();
+        document.getElementById('posterNick').innerText = document.getElementById('inputNick').value.toUpperCase();
+        document.getElementById('posterDate').innerText = document.getElementById('inputDate').value.toUpperCase();
+        document.getElementById('posterWish').innerText = document.getElementById('inputWish').value;
+    }
+
+    function loadLogo(event) {
+        if (event.target.files && event.target.files[0]) {
+            const fileUrl = URL.createObjectURL(event.target.files[0]);
+            document.getElementById('posterLogo').src = fileUrl;
+        }
+    }
+
+    function downloadPoster() {
+        const poster = document.getElementById('posterContainer');
+        const userName = document.getElementById('inputName').value || 'ICBT-Poster';
+
+        html2canvas(poster, {
+            useCORS: true, 
+            scale: 3, 
+            logging: true,
+            allowTaint: false,
+            backgroundColor: null,
+            imageTimeout: 0,
+        }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = `${userName.toLowerCase().replace(/\s+/g, '-')}-birthday.png`;
+            link.href = canvas.toDataURL('image/png', 1.0);
+            link.click();
+        });
+    }
+</script>
+
+</body>
+</html>
